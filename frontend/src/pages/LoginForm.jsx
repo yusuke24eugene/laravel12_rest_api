@@ -8,6 +8,9 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorUsername, setErrorUsername] = useState('');
+  const [errorPassword, setErrorPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
 
   const navigate = useNavigate();
 
@@ -19,29 +22,36 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    try {
-      // 1. First get Sanctum CSRF cookie
-      await axios.get('/sanctum/csrf-cookie')
-      .catch(error => {
-        console.error('CSRF Error:', error);
-      });
 
-      // 2. Then send login request
-      const response = await axios.post('/login', {
-        name: username,
-        password: password,
-      });
+    if (!username) setErrorUsername('Username is required');
+    if (!password) setErrorPassword('Password is required');
 
-      // 3. Handle successful login
-      console.log('Login successful', response.data);
+    if (!errorUsername && !errorPassword) {
+      // Simulate API call
+      try {
+        // 1. First get Sanctum CSRF cookie
+        await axios.get('/sanctum/csrf-cookie')
+          .catch(error => {
+            console.error('CSRF Error:', error);
+          });
 
-      // Redirect logic here (e.g., using react-router)
-      navigate('/');
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setIsLoading(false);
+        // 2. Then send login request
+        const response = await axios.post('/login', {
+          name: username,
+          password: password,
+        });
+
+        // 3. Handle successful login
+        console.log('Login successful', response.data);
+
+        // Redirect logic here (e.g., using react-router)
+        navigate('/');
+      } catch (err) {
+        if (err.response) setLoginError(err.response.data.message);
+        else setLoginError('There is an internal server error');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -75,12 +85,12 @@ export default function LoginForm() {
                   id="username"
                   name="username"
                   type="text"
-                  required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150"
+                  className={`block w-full pl-10 pr-3 py-3 border ${errorUsername ? 'border-red-300' : 'border-gray-300'} ${loginError ? 'border-red-300' : ''} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
+              {errorUsername && <p className="mt-1 text-sm text-red-600">{errorUsername}</p>}
             </div>
 
             <div>
@@ -95,13 +105,14 @@ export default function LoginForm() {
                   id="password"
                   name="password"
                   type="password"
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150"
+                  className={`block w-full pl-10 pr-3 py-3 border ${errorPassword ? 'border-red-300' : 'border-gray-300'} ${loginError ? 'border-red-300' : ''} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
+              {errorPassword && <p className="mt-1 text-sm text-red-600">{errorPassword}</p>}
             </div>
+            {loginError && <p className="mt-1 text-center w-full text-sm text-red-600">{loginError}</p>}
           </div>
 
           <div className="flex items-center justify-between">

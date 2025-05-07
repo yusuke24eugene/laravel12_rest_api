@@ -21,10 +21,11 @@ export default function RegisterForm() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.username) newErrors.name = 'Name is required';
+    if (!formData.username) newErrors.username = 'Username is required';
     if (!formData.email) newErrors.email = 'Email is required';
     if (!formData.password) newErrors.password = 'Password is required';
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) newErrors.confirmPassword = 'Password confirmation is required';
+    else if (formData.password && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     setErrors(newErrors);
@@ -36,9 +37,7 @@ export default function RegisterForm() {
     if (validate()) {
       setIsLoading(true);
       // Simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1500);
+      setIsLoading(false);
     }
   };
 
@@ -70,13 +69,12 @@ export default function RegisterForm() {
                   id="username"
                   name="username"
                   type="text"
-                  required
                   value={formData.name}
                   onChange={handleChange}
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.username ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
+              {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
             </div>
 
             {/* Email Field */}
@@ -92,7 +90,6 @@ export default function RegisterForm() {
                   id="email"
                   name="email"
                   type="email"
-                  required
                   value={formData.email}
                   onChange={handleChange}
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
@@ -114,7 +111,6 @@ export default function RegisterForm() {
                   id="password"
                   name="password"
                   type="password"
-                  required
                   value={formData.password}
                   onChange={handleChange}
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
@@ -136,7 +132,6 @@ export default function RegisterForm() {
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
-                  required
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}

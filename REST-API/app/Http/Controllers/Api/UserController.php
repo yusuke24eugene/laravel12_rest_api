@@ -51,13 +51,10 @@ class UserController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $token = $user->createToken('api_token')->plainTextToken;
-
         if (Auth::attempt($credentials, $request->remember)) {
             return response()->json([
                 'message' => 'Login successful.',
                 'user'    => $user,
-                'token'   => $token,
             ]);
         }
     }

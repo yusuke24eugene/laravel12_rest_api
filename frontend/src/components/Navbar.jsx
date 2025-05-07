@@ -20,11 +20,10 @@ const Navbar = () => {
     .then(response => {
       setIsAuthenticated(true); // User is logged in
       setUser(response.data.name);
-      navigate('/');
     })
     .catch(error => {
       setIsAuthenticated(false); // User is not logged in
-      navigate('/login');
+      setUser(null);
     });
   }, [isAuthenticated]);
 
