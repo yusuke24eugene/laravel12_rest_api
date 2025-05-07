@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -7,13 +9,40 @@ export default function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  // Configure Axios defaults
+  axios.defaults.withCredentials = true;
+  axios.defaults.withXSRFToken = true;
+  axios.defaults.baseURL = 'http://localhost:8000';
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     // Simulate API call
-    setTimeout(() => {
+    try {
+      // 1. First get Sanctum CSRF cookie
+      await axios.get('/sanctum/csrf-cookie')
+      .catch(error => {
+        console.error('CSRF Error:', error);
+      });
+
+      // 2. Then send login request
+      const response = await axios.post('/login', {
+        name: username,
+        password: password,
+      });
+
+      // 3. Handle successful login
+      console.log('Login successful', response.data);
+
+      // Redirect logic here (e.g., using react-router)
+      navigate('/');
+    } catch (err) {
+      console.log(err);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -23,8 +52,8 @@ export default function LoginForm() {
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Login</h2>
           <p className="mt-1 text-sm text-gray-600">
             Don't have an account?{' '}
-            <a 
-              href="/register" 
+            <a
+              href="/register"
               className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
             >
               Register here
@@ -101,9 +130,8 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ${
-                isLoading ? 'opacity-75 cursor-not-allowed' : ''
-              }`}
+              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
             >
               {isLoading ? (
                 <>

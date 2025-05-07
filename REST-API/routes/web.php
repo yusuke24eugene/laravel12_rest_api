@@ -3,12 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
 
 Route::apiResource('products', ProductController::class);
 
@@ -17,10 +16,9 @@ Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 
 // Protected routes
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    'auth:sanctum',
-])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
-    // Add other protected routes here
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 });

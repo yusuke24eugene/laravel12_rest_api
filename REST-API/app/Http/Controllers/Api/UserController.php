@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -51,18 +53,22 @@ class UserController extends Controller
 
         $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Login successful.',
-            'user'    => $user,
-            'token'   => $token,
-        ]);
+        if (Auth::attempt($credentials, $request->remember)) {
+            return response()->json([
+                'message' => 'Login successful.',
+                'user'    => $user,
+                'token'   => $token,
+            ]);
+        }
     }
 
     // Logout
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        Auth::guard('web')->logout(); // destroy session
+        $request->session()->invalidate();       // Invalidates session
+        $request->session()->regenerateToken();  // Regenerates CSRF token
 
-        return response()->json(['message' => 'Logged out successfully.']);
+        return response()->json(['message' => 'Logged out']);
     }
 }
