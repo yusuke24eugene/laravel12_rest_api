@@ -47,7 +47,7 @@ export default function LoginForm() {
         // Redirect logic here (e.g., using react-router)
         navigate('/');
       } catch (err) {
-        if (err.response) setLoginError(err.response.data.message);
+        if (err.response && err.response.data.message === 'Invalid credentials') setLoginError(err.response.data.message);
         else setLoginError('There is an internal server error');
       } finally {
         setIsLoading(false);

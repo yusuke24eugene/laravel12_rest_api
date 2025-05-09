@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { EnvelopeIcon, LockClosedIcon, UserIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -32,12 +34,54 @@ export default function RegisterForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  // Configure Axios defaults
+  axios.defaults.withCredentials = true;
+  axios.defaults.withXSRFToken = true;
+  axios.defaults.baseURL = 'http://localhost:8000';
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
       setIsLoading(true);
       // Simulate API call
-      setIsLoading(false);
+      try {
+        // 1. First get Sanctum CSRF cookie
+        await axios.get('/sanctum/csrf-cookie')
+          .catch(error => {
+            console.error('CSRF Error:', error);
+          });
+
+        // 2. Then send register request
+        const response = await axios.post('/register', {
+          name: formData.username,
+          email: formData.email,
+          password: formData.password,
+          password_confirmation: formData.confirmPassword,
+        });
+
+        // 3. Handle successful register
+        console.log('Registration successful', response.data);
+
+        // Redirect logic here (e.g., using react-router)
+        navigate('/');
+      } catch (err) {
+        if (err.response && err.response.status === 422) {
+          const serverErrors = err.response.data;
+          const mappedErrors = {
+            username: serverErrors.name,
+            email: serverErrors.email,
+            password: serverErrors.password,
+            confirmPassword: serverErrors.password_confirmation,
+          };
+          setErrors(mappedErrors);
+        } else {
+          console.error('Registration error:', err);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -69,12 +113,12 @@ export default function RegisterForm() {
                   id="username"
                   name="username"
                   type="text"
-                  value={formData.name}
+                  value={formData.username}
                   onChange={handleChange}
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.username ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
-              {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
+              {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username[0]}</p>}
             </div>
 
             {/* Email Field */}
@@ -95,7 +139,7 @@ export default function RegisterForm() {
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email[0]}</p>}
             </div>
 
             {/* Password Field */}
@@ -116,7 +160,7 @@ export default function RegisterForm() {
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password[0]}</p>}
             </div>
 
             {/* Confirm Password Field */}
@@ -137,25 +181,7 @@ export default function RegisterForm() {
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'} rounded-lg focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition duration-150`}
                 />
               </div>
-              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
-            </div>
-          </div>
-
-          {/* Terms Checkbox */}
-          <div className="flex items-start">
-            <div className="flex items-center h-5">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-            </div>
-            <div className="ml-3 text-sm">
-              <label htmlFor="terms" className="font-medium text-gray-700">
-                I agree to the <a href="#" className="text-indigo-600 hover:text-indigo-500">Terms</a> and <a href="#" className="text-indigo-600 hover:text-indigo-500">Privacy Policy</a>
-              </label>
+              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword[0]}</p>}
             </div>
           </div>
 
