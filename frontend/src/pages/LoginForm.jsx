@@ -45,7 +45,7 @@ export default function LoginForm() {
         console.log('Login successful', response.data);
 
         // Redirect logic here (e.g., using react-router)
-        navigate('/');
+        window.location.replace("http://localhost:5173/");
       } catch (err) {
         if (err.response && err.response.data.message === 'Invalid credentials') setLoginError(err.response.data.message);
         else setLoginError('There is an internal server error');

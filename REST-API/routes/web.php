@@ -9,9 +9,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::apiResource('products', ProductController::class);
-
-// Register & login (public)
+ // Register & login (public)
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 
@@ -21,4 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::apiResource('products', ProductController::class);
 });

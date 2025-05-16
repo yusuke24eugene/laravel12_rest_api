@@ -25,7 +25,7 @@ const Navbar = () => {
       setIsAuthenticated(false); // User is not logged in
       setUser(null);
     });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const logout = async (e) => {
     e.preventDefault();
@@ -58,7 +58,7 @@ const Navbar = () => {
     <nav className="bg-gray-800 text-white p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="text-2xl font-bold hover:text-yellow-400">
-            <Link to="/">Grocery</Link>
+          <Link to="/">Grocery</Link>
         </div>
         
         <ul className="flex space-x-6">
@@ -66,6 +66,9 @@ const Navbar = () => {
             isAuthenticated ? (
               <div className='flex space-x-6'>
                 <p className='font-semibold'>{ user }</p>
+                <div className="font-bold hover:text-yellow-400">
+                  <Link to="/dashboard">Dashboard</Link>
+                </div>
                 <li className="hover:text-yellow-400 cursor-pointer" onClick={logout}>Logout</li>  
               </div>
             ) : (
