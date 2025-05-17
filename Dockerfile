@@ -46,10 +46,6 @@ RUN apk add --no-cache \
     bash \
     curl
 
-# Install PHP extensions
-RUN apk add --no-cache libxml2-dev oniguruma-dev && \
-    docker-php-ext-install pdo pdo_mysql mbstring gd zip bcmath
-
 # Copy PHP config and extensions
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
