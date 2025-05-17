@@ -5,8 +5,8 @@ FROM php:8.2-fpm
 WORKDIR /var/www
 
 # Copy only laravel-app contents
-COPY ./REST-API/composer.json ./composer.json
-COPY ./REST-API/composer.lock ./composer.lock
+COPY ./REST-API/composer.json
+COPY ./REST-API/composer.lock
 
 # Install system deps
 RUN apt-get update && apt-get install -y \
