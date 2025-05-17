@@ -5,8 +5,8 @@ FROM php:8.2-fpm
 WORKDIR /var/www
 
 # Copy only laravel-app contents
-COPY ./RESTAPI/composer.json ./composer.json
-COPY ./RESTAPI/composer.lock ./composer.lock
+COPY ./REST-API/composer.json ./composer.json
+COPY ./REST-API/composer.lock ./composer.lock
 
 # Install system deps
 RUN apt-get update && apt-get install -y \
@@ -18,7 +18,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --optimize-autoloader --no-dev
 
 # Now copy the full Laravel app code
-COPY ./RESTAPI/ .
+COPY ./REST-API/ .
 
 # Expose the port
 EXPOSE 8000
