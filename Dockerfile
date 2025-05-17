@@ -31,11 +31,11 @@ RUN docker-php-ext-install \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy only what's needed for composer install
-COPY composer.json composer.lock ./
+COPY REST-API/composer.json REST-API/composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
 
 # Copy the rest of the application
-COPY . .
+COPY REST-API/ .
 
 # Finish composer install
 RUN composer dump-autoload --optimize && \
