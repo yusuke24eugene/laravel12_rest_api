@@ -15,7 +15,8 @@ RUN apk add --no-cache \
     oniguruma-dev
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install pdo pdo_mysql mbstring gd zip
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -39,38 +40,47 @@ FROM php:8.2-fpm-alpine
 
 WORKDIR /var/www
 
-# Install production dependencies
+# Install runtime dependencies
 RUN apk add --no-cache \
     nginx \
-    supervisor \
     libzip \
     libpng \
     libjpeg-turbo \
-    freetype
+    freetype \
+    bash \
+    curl
 
-# Copy PHP extensions from builder
+# Install PHP extensions
+RUN apk add --no-cache libxml2-dev oniguruma-dev && \
+    docker-php-ext-install pdo pdo_mysql mbstring gd zip bcmath
+
+# Copy PHP config and extensions
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 
-# Copy application from builder
+# Copy app
 COPY --from=builder /var/www /var/www
 
-# Configure PHP
+# Copy nginx config
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# PHP-FPM config (optional, can customize pool config if needed)
+# COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Configure PHP settings
 RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini && \
     echo "upload_max_filesize = 128M" >> /usr/local/etc/php/conf.d/uploads.ini && \
     echo "post_max_size = 128M" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Configure nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Configure supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Copy entrypoint script
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
 # Expose port
 EXPOSE 8000
 
-# Start application
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start both PHP-FPM and Nginx
+CMD ["/start.sh"] 
