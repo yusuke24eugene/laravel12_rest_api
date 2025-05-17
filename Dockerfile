@@ -1,39 +1,91 @@
-# Base image
-FROM php:8.2-fpm
+# Stage 1: Build stage
+FROM php:8.2-cli-alpine as builder
 
-# Set working dir inside the container
 WORKDIR /var/www
 
-# Copy only laravel-app contents
-COPY ./REST-API/composer.json
-COPY ./REST-API/composer.lock
-
-# Install system deps
-RUN apt-get update && apt-get install -y \
-    unzip \
+# Install system dependencies
+RUN apk add --no-cache \
     git \
+    unzip \
     curl \
-    zip \
     libzip-dev \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    pkg-config \
-    && docker-php-ext-configure zip \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip bcmath \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libjpeg-turbo-dev \
+    freetype-dev \
+    oniguruma-dev
 
-# Install composer dependencies
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install \
+    pdo_mysql \
+    bcmath \
+    ctype \
+    fileinfo \
+    mbstring \
+    tokenizer \
+    xml \
+    gd \
+    zip
 
-# Now copy the full Laravel app code
-COPY ./REST-API/ .
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Expose the port
+# Copy only what's needed for composer install
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
+
+# Copy the rest of the application
+COPY . .
+
+# Finish composer install
+RUN composer dump-autoload --optimize && \
+    composer run-script post-autoload-dump
+
+# Generate application key if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env && php artisan key:generate; fi
+
+# Stage 2: Production stage
+FROM php:8.2-fpm-alpine
+
+WORKDIR /var/www
+
+# Install production dependencies
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    libzip \
+    libpng \
+    libjpeg-turbo \
+    freetype
+
+# Copy PHP extensions from builder
+COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+
+# Copy application from builder
+COPY --from=builder /var/www /var/www
+
+# Configure PHP
+RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini && \
+    echo "upload_max_filesize = 128M" >> /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "post_max_size = 128M" >> /usr/local/etc/php/conf.d/uploads.ini
+
+# Configure nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# Configure supervisor
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Optimize Laravel
+RUN php artisan optimize:clear && \
+    php artisan optimize && \
+    php artisan storage:link
+
+# Expose port
 EXPOSE 8000
 
-# Start Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Start application
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
