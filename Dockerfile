@@ -69,11 +69,6 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Optimize Laravel
-RUN php artisan optimize:clear && \
-    php artisan optimize && \
-    php artisan storage:link
-
 # Expose port
 EXPOSE 8000
 
