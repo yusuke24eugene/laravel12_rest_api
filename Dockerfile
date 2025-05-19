@@ -13,10 +13,9 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev \
     oniguruma-dev \
-    && docker-php-ext-install pdo pdo_pgsql
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+    # Install Composer
+    COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy only what's needed for composer install
 COPY REST-API/composer.json REST-API/composer.lock ./
@@ -37,7 +36,7 @@ FROM php:8.2-fpm-alpine
 
 WORKDIR /var/www
 
-# Install runtime dependencies
+# Install runtime dependencies and PostgreSQL support
 RUN apk add --no-cache \
     nginx \
     libzip \
@@ -45,7 +44,10 @@ RUN apk add --no-cache \
     libjpeg-turbo \
     freetype \
     bash \
-    curl
+    curl \
+    libpq \
+    postgresql-dev \
+    && docker-php-ext-install pdo pdo_pgsql
 
 # Copy PHP config and extensions
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
@@ -57,7 +59,7 @@ COPY --from=builder /var/www /var/www
 # Copy nginx config
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-# PHP-FPM config (optional, can customize pool config if needed)
+# PHP-FPM config (optional)
 # COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Configure PHP settings
@@ -76,4 +78,4 @@ RUN chmod +x /start.sh
 EXPOSE 8000
 
 # Start both PHP-FPM and Nginx
-CMD ["/start.sh"] 
+CMD ["/start.sh"]
