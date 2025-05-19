@@ -10,7 +10,7 @@ const Navbar = () => {
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
   axios.defaults.withXSRFToken = true;
-  axios.defaults.baseURL = 'http://localhost:8000';
+  axios.defaults.baseURL = process.env.BACKEND_URL;
 
   const navigate = useNavigate();
 

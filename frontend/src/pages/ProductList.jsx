@@ -22,7 +22,7 @@ const ProductList = () => {
 
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
-  axios.defaults.baseURL = 'http://localhost:8000';
+  axios.defaults.baseURL = process.env.BACKEND_URL;
 
   const checkAuth = async () => {
     try {

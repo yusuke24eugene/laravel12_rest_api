@@ -39,7 +39,7 @@ export default function RegisterForm() {
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
   axios.defaults.withXSRFToken = true;
-  axios.defaults.baseURL = 'http://localhost:8000';
+  axios.defaults.baseURL = process.env.BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
