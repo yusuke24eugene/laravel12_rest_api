@@ -12,10 +12,10 @@ RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
-    oniguruma-dev \
+    oniguruma-dev
 
-    # Install Composer
-    COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy only what's needed for composer install
 COPY REST-API/composer.json REST-API/composer.lock ./
