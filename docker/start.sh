@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Run migrations
+php artisan config:clear
+php artisan config:cache
 php artisan migrate --force
 
 # Start PHP-FPM
