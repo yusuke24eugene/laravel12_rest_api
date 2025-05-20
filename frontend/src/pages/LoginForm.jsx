@@ -17,7 +17,7 @@ export default function LoginForm() {
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
   axios.defaults.withXSRFToken = true;
-  axios.defaults.baseURL = process.env.BACKEND_URL;
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +45,7 @@ export default function LoginForm() {
         console.log('Login successful', response.data);
 
         // Redirect logic here (e.g., using react-router)
-        window.location.replace("http://localhost:5173/");
+        window.location.replace(import.meta.env.VITE_APP_URL);
       } catch (err) {
         if (err.response && err.response.data.message === 'Invalid credentials') setLoginError(err.response.data.message);
         else setLoginError('There is an internal server error');

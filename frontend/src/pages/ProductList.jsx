@@ -22,7 +22,7 @@ const ProductList = () => {
 
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
-  axios.defaults.baseURL = process.env.BACKEND_URL;
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
   const checkAuth = async () => {
     try {

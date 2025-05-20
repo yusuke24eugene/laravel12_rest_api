@@ -16,7 +16,7 @@ const ProductDashboard = () => {
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
   axios.defaults.withXSRFToken = true;
-  axios.defaults.baseURL = process.env.BACKEND_URL;
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
 
   const fetchProducts = async (page = 1) => {

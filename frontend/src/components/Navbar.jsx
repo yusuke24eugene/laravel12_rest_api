@@ -6,25 +6,32 @@ import axios from 'axios';
 const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
 
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
   axios.defaults.withXSRFToken = true;
-  axios.defaults.baseURL = process.env.BACKEND_URL;
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axios.get('/sanctum/csrf-cookie');
+  const getUser = () => {
     axios.get('/user')
     .then(response => {
       setIsAuthenticated(true); // User is logged in
       setUser(response.data.name);
+      setReady(true);
     })
     .catch(error => {
       setIsAuthenticated(false); // User is not logged in
       setUser(null);
+      setReady(true);
     });
+  }
+
+  useEffect(() => {
+    axios.get('/sanctum/csrf-cookie');
+    getUser();
   }, [isAuthenticated, user]);
 
   const logout = async (e) => {
@@ -60,29 +67,37 @@ const Navbar = () => {
         <div className="text-2xl font-bold hover:text-yellow-400">
           <Link to="/">Grocery</Link>
         </div>
-        
+        {ready && ( // ✅ Render only after function is done
         <ul className="flex space-x-6">
-          {
-            isAuthenticated ? (
-              <div className='flex space-x-6'>
-                <p className='font-semibold'>{ user }</p>
-                <div className="font-bold hover:text-yellow-400">
-                  <Link to="/dashboard">Dashboard</Link>
-                </div>
-                <li className="hover:text-yellow-400 cursor-pointer" onClick={logout}>Logout</li>  
+          {isAuthenticated ? (
+            <div className="flex space-x-6">
+              <p className="font-semibold">{user}</p>
+              <div className="font-bold hover:text-yellow-400">
+                <Link to="/dashboard">Dashboard</Link>
               </div>
-            ) : (
-              <>
-                <li>
-                  <Link to="/login" className="hover:text-yellow-400">Login</Link>
-                </li>
-                <li>
-                  <Link to="/register" className="hover:text-yellow-400">Register</Link>
-                </li> 
-              </>
-            )
-          }
+              <li
+                className="hover:text-yellow-400 cursor-pointer"
+                onClick={logout}
+              >
+                Logout
+              </li>
+            </div>
+          ) : (
+            <>
+              <li>
+                <Link to="/login" className="hover:text-yellow-400">
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="hover:text-yellow-400">
+                  Register
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
+      )}
       </div>
     </nav>
   );

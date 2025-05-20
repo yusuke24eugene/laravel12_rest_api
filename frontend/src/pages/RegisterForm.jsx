@@ -39,7 +39,7 @@ export default function RegisterForm() {
   // Configure Axios defaults
   axios.defaults.withCredentials = true;
   axios.defaults.withXSRFToken = true;
-  axios.defaults.baseURL = process.env.BACKEND_URL;
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,8 +64,13 @@ export default function RegisterForm() {
         // 3. Handle successful register
         console.log('Registration successful', response.data);
 
+        await axios.post('/login', {
+          name: formData.username,
+          password: formData.password,
+        });
+
         // Redirect logic here (e.g., using react-router)
-        navigate('/');
+        window.location.replace(import.meta.env.VITE_APP_URL);
       } catch (err) {
         if (err.response && err.response.status === 422) {
           const serverErrors = err.response.data;
