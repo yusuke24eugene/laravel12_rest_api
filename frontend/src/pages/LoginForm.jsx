@@ -48,7 +48,7 @@ export default function LoginForm() {
         window.location.replace(import.meta.env.VITE_APP_URL);
       } catch (err) {
         if (err.response && err.response.data.message === 'Invalid credentials') setLoginError(err.response.data.message);
-        else setLoginError('There is an internal server error');
+        else setLoginError('Login error');
       } finally {
         setIsLoading(false);
       }
