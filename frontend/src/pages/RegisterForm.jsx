@@ -190,7 +190,7 @@ export default function RegisterForm() {
               </div>
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword[0]}</p>}
             </div>
-            {serverErr && <p className="mt-1 text-sm text-red-600">{serverErr}</p>}
+            {serverErr && <p className="mt-1 text-center w-full text-sm text-red-600">{serverErr}</p>}
           </div>
 
           {/* Submit Button */}
