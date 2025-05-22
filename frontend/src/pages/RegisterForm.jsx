@@ -12,6 +12,7 @@ export default function RegisterForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [serverErr, setServerErr] = useState();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,6 +84,7 @@ export default function RegisterForm() {
           setErrors(mappedErrors);
         } else {
           console.error('Registration error:', err);
+          setServerErr('Server error');
         }
       } finally {
         setIsLoading(false);
@@ -188,7 +190,7 @@ export default function RegisterForm() {
               </div>
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword[0]}</p>}
             </div>
-            {err && <p className="mt-1 text-sm text-red-600">err</p>}
+            {serverErr && <p className="mt-1 text-sm text-red-600">{serverErr}</p>}
           </div>
 
           {/* Submit Button */}
