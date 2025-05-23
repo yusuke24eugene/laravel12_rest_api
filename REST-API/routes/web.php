@@ -10,9 +10,16 @@ Route::get('/', function () {
 return view('welcome');
 });
 
-// Register & login (public)
+
+Route::middleware([
+    EnsureFrontendRequestsAreStateful::class,
+    'web',
+])->group(function () {
+    // Register & login (public)
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
+
+});
 
 // Protected routes
 Route::middleware([
